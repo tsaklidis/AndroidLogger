@@ -12,13 +12,16 @@
  mind that the widget or the app may crash or have unexpected behaviour
 
 
-* I would like to see some feedback for any problems you found.
-
-Download the .apk [from here](https://github.com/tsaklidis/AndroidLogger/blob/master/Logger.apk)
+* I would like to see some feedback for any problems you found. Download the .apk [from here](https://github.com/tsaklidis/AndroidLogger/blob/master/Logger.apk)
 
 
 ![](photo/widget.png)
+
 ![](photo/main.png)
+
+### TODO
+* Translate the widget
+* Create separate widgets for each measurement (temperature, humidity, pressure)
 
 ### Author
 
