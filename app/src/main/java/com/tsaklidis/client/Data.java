@@ -70,7 +70,7 @@ public class Data {
 
                 if (views != null){
                     views.setTextViewText(R.id.temperature, "Θερμοκρασία: " + temperature + " \u2103");
-                    views.setTextViewText(R.id.created_on, created_on);
+                    // views.setTextViewText(R.id.created_on, created_on);
                 }
                 if (adapter != null){
                     arrayList.add("Time: " + String.valueOf(created_on));

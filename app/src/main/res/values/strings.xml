@@ -11,7 +11,7 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="appwidget_text">Temperature | Humidity | Pressure</string>
     <string name="add_widget">Add widget</string>
-    <string name="app_widget_description">Μετρήσεις απο τον μετεωρολογικό σταθμό Τσακλίδης</string>
+    <string name="app_widget_description">Μετρήσεις μετεωρολογικού σταθμού (Τσακλίδης)</string>
     <string name="time">%1$s</string>
     <string name="last_update">The last update str</string>
     <string name="update">Ανανέωση</string>

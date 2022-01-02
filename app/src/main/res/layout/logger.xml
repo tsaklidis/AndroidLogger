@@ -43,13 +43,4 @@
             android:textSize="12sp"
             android:drawableRight="@drawable/ic_baseline_refresh_24"
             android:text="@string/na" />
-
-        <TextView
-            android:id="@+id/sign"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textStyle="italic"
-            android:text="Stefanos I. Tsaklidis" />
-
 </LinearLayout>
