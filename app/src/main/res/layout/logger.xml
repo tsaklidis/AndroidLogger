@@ -16,31 +16,40 @@
 
         <TextView
             android:id="@+id/temperature"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/na"
+            android:drawableLeft="@drawable/ic_temperature"
+            android:gravity="center_vertical"
+            style="@style/item"/>
+
+
+        <TextView
+            android:id="@+id/humidity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/na"
+            android:drawableLeft="@drawable/ic_humidity"
+            android:gravity="center_vertical"
             style="@style/item"/>
 
         <TextView
             android:id="@+id/pressure"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/item"
-            android:text="@string/na" />
-
-        <TextView
-            android:id="@+id/humidity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/item"
+            android:drawableLeft="@drawable/ic_pressure_meter"
+            android:gravity="center_vertical"
             android:text="@string/na" />
 
         <TextView
             android:id="@+id/created_on"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/item"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:drawableRight="@drawable/ic_baseline_refresh_24"
+            android:layout_gravity="right"
+            android:gravity="center_vertical"
             android:text="@string/na" />
 </LinearLayout>

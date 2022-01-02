@@ -25,4 +25,9 @@
 
 ### Author
 
-* **Stefanos I. Taklidis** - [tsaklidis.gr](https://tsaklidis.gr)
+* **Stefanos I. Tsaklidis** - [tsaklidis.gr](https://tsaklidis.gr)
+
+### Icons
+* Temperature Icon by: [Petai Jantrapoon](https://iconscout.com/contributors/petai-jantrapoon)
+* Humidity Icon by: [Petai Jantrapoon](https://iconscout.com/contributors/petai-jantrapoon)
+* Pressure Icon by: [Kerismaker Studio](https://iconscout.com/contributors/kerismaker)

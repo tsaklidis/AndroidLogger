@@ -69,7 +69,7 @@ public class Data {
 
 
                 if (views != null){
-                    views.setTextViewText(R.id.temperature, "Θερμοκρασία: " + temperature + " \u2103");
+                    views.setTextViewText(R.id.temperature, temperature + " \u2103");
                     // views.setTextViewText(R.id.created_on, created_on);
                 }
                 if (adapter != null){
@@ -96,7 +96,7 @@ public class Data {
                 humidity = String.valueOf(response.body().getValue());
                 Log.d(TAG, "called getHumidity(): " + humidity);
                 if (views != null) {
-                    views.setTextViewText(R.id.humidity, "Υγρασία: " + humidity + " %Rh");
+                    views.setTextViewText(R.id.humidity, humidity + " %Rh");
                 }
                 if (adapter != null){
                     arrayList.add("Humidity: " + humidity + " %Rh");
@@ -119,7 +119,7 @@ public class Data {
             public void onResponse(Call<Model> call, Response<Model> response) {
                 pressure = String.valueOf(response.body().getValue());
                 if (views != null){
-                    views.setTextViewText(R.id.pressure, "Βαρομετρική πίεση: " + pressure + " hPa");
+                    views.setTextViewText(R.id.pressure, pressure + " hPa");
                 }
                 if (adapter != null){
                     arrayList.add("Pressure: " + pressure + " hPa");
