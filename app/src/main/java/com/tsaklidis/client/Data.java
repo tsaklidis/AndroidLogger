@@ -65,12 +65,12 @@ public class Data {
                 created_on = response.body().getCreated_on();
 
                 //"2022-01-01T17:10:15.977152+02:00"
-                created_on = created_on.substring(11, 16);
+                created_on = "Μέτρηση: " + created_on.substring(0, 10) + " " + created_on.substring(11, 16);
 
 
                 if (views != null){
                     views.setTextViewText(R.id.temperature, temperature + " \u2103");
-                    // views.setTextViewText(R.id.created_on, created_on);
+                    views.setTextViewText(R.id.created_on, created_on);
                 }
                 if (adapter != null){
                     arrayList.add("Time: " + String.valueOf(created_on));

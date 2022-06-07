@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -36,17 +37,17 @@ public class Logger extends AppWidgetProvider {
         //Wrap the intent as a PendingIntent, using PendingIntent.getBroadcast()//
         PendingIntent pendingUpdate = PendingIntent.getBroadcast(
                 context, appWidgetId, intentUpdate,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_IMMUTABLE);
 
         //Send the pending intent in response to the user tapping the ‘Update’ TextView//
 
         views.setOnClickPendingIntent(R.id.created_on, pendingUpdate);
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://logs.tsaklidis.gr"));
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-        views.setOnClickPendingIntent(R.id.title, pendingIntent);
+//        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://logs.tsaklidis.gr"));
+//        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+//        views.setOnClickPendingIntent(R.id.title, pendingIntent);
 
-        String timeString = DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date());
-        views.setTextViewText(R.id.created_on, context.getResources().getString(R.string.time, timeString));
+//        String timeString = DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date());
+//        views.setTextViewText(R.id.updated_on, context.getResources().getString(R.string.time, "Ανανεώθηκε: " + timeString));
 
         //Request that the AppWidgetManager updates the application widget//
         appWidgetManager.updateAppWidget(appWidgetId, views);
