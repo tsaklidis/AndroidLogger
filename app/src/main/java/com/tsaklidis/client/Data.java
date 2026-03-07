@@ -49,7 +49,6 @@ public class Data {
     private final SensorAdapter adapter;
     
     private final AtomicInteger activeCalls = new AtomicInteger(0);
-    private boolean errorShown = false;
     private final Methods methods;
     private DataUpdateListener listener;
 
@@ -76,10 +75,6 @@ public class Data {
         
         // 2 calls: Bulk Open Data + MinMax History
         activeCalls.set(2);
-        
-        if (views != null) {
-            views.setViewVisibility(R.id.auth_record_layout, View.GONE);
-        }
         
         fetchOpenDataBulk();
         fetchMinMaxTemperature(1, Double.MAX_VALUE, -Double.MAX_VALUE);
@@ -131,13 +126,11 @@ public class Data {
                             }
                         } else if (UUID_HUM.equals(uuid)) {
                             humidity = String.valueOf(m.getValue());
-                            if (views != null) views.setTextViewText(R.id.humidity, humidity + " %Rh");
                         } else if (UUID_PRESS.equals(uuid)) {
                             pressure = String.valueOf(m.getValue());
-                            if (views != null) views.setTextViewText(R.id.widget_pressure, pressure + " hPa");
                         }
                     }
-                    if (views != null) widgetManager.updateAppWidget(appWidgetId, views);
+                    if (views != null && widgetManager != null) widgetManager.updateAppWidget(appWidgetId, views);
                 }
                 callFinished();
             }
@@ -245,7 +238,7 @@ public class Data {
             String text = String.format(Locale.getDefault(), "%.1f", min) + " \u2103  /  " + String.format(Locale.getDefault(), "%.1f", max) + " \u2103";
             if (views != null) {
                 views.setTextViewText(R.id.temp_min_max, text);
-                widgetManager.updateAppWidget(appWidgetId, views);
+                if (widgetManager != null) widgetManager.updateAppWidget(appWidgetId, views);
             }
         }
     }

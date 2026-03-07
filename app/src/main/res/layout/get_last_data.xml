@@ -67,8 +67,7 @@
                 android:textSize="12sp"
                 android:padding="4dp"
                 android:textColor="#EF4444"
-                android:drawableStart="@android:drawable/ic_menu_delete"
-                app:backgroundTint="#10EF4444" />
+                android:drawableStart="@android:drawable/ic_menu_delete" />
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -77,7 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:hint="Search name or space"
+            android:hint="Search sensors..."
             app:startIconDrawable="@android:drawable/ic_menu_search"
             app:endIconMode="clear_text">
             <com.google.android.material.textfield.TextInputEditText
@@ -87,6 +86,7 @@
                 android:textSize="14sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Kinds Filter -->
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -96,8 +96,20 @@
                 android:id="@+id/kind_chip_group"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:singleSelection="true"
-                app:selectionRequired="false" />
+                app:singleSelection="false" />
+        </HorizontalScrollView>
+
+        <!-- Spaces Filter -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:scrollbars="none">
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/space_chip_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="false" />
         </HorizontalScrollView>
 
         <TextView

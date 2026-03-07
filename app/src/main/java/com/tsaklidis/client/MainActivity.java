@@ -46,10 +46,13 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
     private EditText tokenInput;
     private EditText searchInput;
     private ChipGroup kindChipGroup;
+    private ChipGroup spaceChipGroup;
     private SharedPreferences prefs;
     private ProgressBar progressBar;
     private final Gson gson = new Gson();
-    private String currentSelectedKind = "";
+    
+    private final Set<String> selectedKinds = new HashSet<>();
+    private final Set<String> selectedSpaces = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
         tokenInput = findViewById(R.id.token_input);
         searchInput = findViewById(R.id.search_input);
         kindChipGroup = findViewById(R.id.kind_chip_group);
+        spaceChipGroup = findViewById(R.id.space_chip_group);
         progressBar = findViewById(R.id.loading_progress);
         RecyclerView recyclerView = findViewById(R.id.sensors_recycler_view);
         btnRefresh = findViewById(R.id.latest);
@@ -106,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         recyclerView.setAdapter(adapter);
 
-        updateKindChips();
+        updateFilterChips();
         refreshData();
 
         btnRefresh.setOnClickListener(v -> refreshData());
@@ -120,11 +124,13 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
 
         new AlertDialog.Builder(this)
                 .setTitle("Delete All Sensors")
-                .setMessage("Are you sure you want to remove all " + sensorList.size() + " sensors? This cannot be undone.")
+                .setMessage("Are you sure you want to remove all " + sensorList.size() + " sensors?")
                 .setPositiveButton("Delete All", (dialog, which) -> {
                     sensorList.clear();
                     saveSensors();
-                    updateKindChips();
+                    selectedKinds.clear();
+                    selectedSpaces.clear();
+                    updateFilterChips();
                     adapter.updateData(sensorList);
                     Toast.makeText(this, "All sensors deleted", Toast.LENGTH_SHORT).show();
                 })
@@ -132,34 +138,60 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
                 .show();
     }
 
-    private void updateKindChips() {
+    private void updateFilterChips() {
+        // Update Kind Chips
         kindChipGroup.removeAllViews();
         Set<String> kinds = new HashSet<>();
         for (SensorConfig sensor : sensorList) {
-            if (sensor.getKind() != null && !sensor.getKind().isEmpty()) {
-                kinds.add(sensor.getKind());
-            }
+            if (sensor.getKind() != null && !sensor.getKind().isEmpty()) kinds.add(sensor.getKind());
         }
-
         for (String kind : kinds) {
             Chip c = new Chip(this);
             c.setText(kind);
             c.setCheckable(true);
-            c.setOnClickListener(v -> {
-                if (c.isChecked()) {
-                    currentSelectedKind = kind;
-                } else {
-                    currentSelectedKind = "";
-                }
+            if (selectedKinds.contains(kind)) c.setChecked(true);
+            c.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) selectedKinds.add(kind);
+                else selectedKinds.remove(kind);
                 applyFilters();
             });
             kindChipGroup.addView(c);
         }
+
+        // Update Space Chips
+        spaceChipGroup.removeAllViews();
+        Set<String> spaces = new HashSet<>();
+        for (SensorConfig sensor : sensorList) {
+            if (sensor.getSpaceName() != null && !sensor.getSpaceName().isEmpty()) spaces.add(sensor.getSpaceName());
+        }
+        for (String space : spaces) {
+            Chip c = new Chip(this);
+            c.setText(space);
+            c.setCheckable(true);
+            if (selectedSpaces.contains(space)) c.setChecked(true);
+            c.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) selectedSpaces.add(space);
+                else selectedSpaces.remove(space);
+                applyFilters();
+            });
+            spaceChipGroup.addView(c);
+        }
     }
 
     private void applyFilters() {
-        String query = searchInput.getText().toString();
-        adapter.filter(query, currentSelectedKind);
+        String query = searchInput.getText().toString().toLowerCase();
+        List<SensorConfig> filtered = new ArrayList<>();
+        
+        for (SensorConfig sensor : sensorList) {
+            boolean matchesQuery = query.isEmpty() || sensor.getName().toLowerCase().contains(query);
+            boolean matchesKind = selectedKinds.isEmpty() || selectedKinds.contains(sensor.getKind());
+            boolean matchesSpace = selectedSpaces.isEmpty() || selectedSpaces.contains(sensor.getSpaceName());
+
+            if (matchesQuery && matchesKind && matchesSpace) {
+                filtered.add(sensor);
+            }
+        }
+        adapter.updateData(filtered);
     }
 
     private void syncAccountSensors() {
@@ -170,53 +202,46 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
         }
 
         if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
-        Toast.makeText(this, "Syncing account sensors...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Syncing sensors...", Toast.LENGTH_SHORT).show();
         
         Methods methods = RetrofitClient.getMethods(this);
         methods.getMyHouses().enqueue(new Callback<List<HouseModel>>() {
             @Override
             public void onResponse(Call<List<HouseModel>> call, Response<List<HouseModel>> response) {
                 if (progressBar != null) progressBar.setVisibility(View.GONE);
-                
                 if (response.isSuccessful() && response.body() != null) {
                     List<HouseModel> houses = response.body();
                     List<SensorConfig> newSensors = new ArrayList<>();
-                    
                     for (HouseModel house : houses) {
                         if (house.getSpaces() != null) {
                             for (HouseModel.Space space : house.getSpaces()) {
                                 if (space.getSensors() != null) {
                                     for (HouseModel.Sensor sensor : space.getSensors()) {
-                                        String displayName = house.getName() + ": " + space.getName() + " (" + sensor.getName() + ")";
-                                        SensorConfig config = new SensorConfig(displayName, space.getUuid(), sensor.getUuid());
+                                        SensorConfig config = new SensorConfig(sensor.getName(), space.getUuid(), sensor.getUuid());
                                         config.setKind(sensor.getKind());
+                                        config.setSpaceName(space.getName());
                                         newSensors.add(config);
                                     }
                                 }
                             }
                         }
                     }
-                    
                     if (!newSensors.isEmpty()) {
                         sensorList.clear();
                         sensorList.addAll(newSensors);
                         saveSensors();
-                        updateKindChips();
+                        selectedKinds.clear();
+                        selectedSpaces.clear();
+                        updateFilterChips();
                         adapter.updateData(sensorList);
                         refreshData();
-                        Toast.makeText(MainActivity.this, "Successfully synced " + newSensors.size() + " sensors", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, "No sensors found in your account", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, "Synced " + newSensors.size() + " sensors", Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Toast.makeText(MainActivity.this, "Sync failed (Code: " + response.code() + ")", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onFailure(Call<List<HouseModel>> call, Throwable t) {
                 if (progressBar != null) progressBar.setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -225,17 +250,15 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
         String json = prefs.getString("sensors_json", "");
         if (json.isEmpty()) {
             sensorList = new ArrayList<>();
-            sensorList.add(new SensorConfig("Living Room", "f3f279d9", "369883d4"));
+            sensorList.add(new SensorConfig("Example Sensor", "f3f279d9", "369883d4"));
             saveSensors();
         } else {
-            Type type = new TypeToken<List<SensorConfig>>() {}.getType();
-            sensorList = gson.fromJson(json, type);
+            sensorList = gson.fromJson(json, new TypeToken<List<SensorConfig>>() {}.getType());
         }
     }
 
     private void saveSensors() {
-        String json = gson.toJson(sensorList);
-        prefs.edit().putString("sensors_json", json).apply();
+        prefs.edit().putString("sensors_json", gson.toJson(sensorList)).apply();
         updateWidgets();
     }
 
@@ -258,11 +281,7 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
                     String name = nameInput.getText().toString().trim();
                     String space = spaceInput.getText().toString().trim();
                     String sensor = sensorInput.getText().toString().trim();
-
-                    if (name.isEmpty() || space.isEmpty() || sensor.isEmpty()) {
-                        Toast.makeText(this, "All fields are required", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                    if (name.isEmpty() || space.isEmpty() || sensor.isEmpty()) return;
 
                     if (existing == null) {
                         sensorList.add(new SensorConfig(name, space, sensor));
@@ -272,8 +291,8 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
                         existing.setSensorUuid(sensor);
                     }
                     saveSensors();
-                    updateKindChips();
-                    adapter.updateData(sensorList);
+                    updateFilterChips();
+                    applyFilters();
                     refreshData();
                 })
                 .setNegativeButton("Cancel", null)
@@ -281,59 +300,34 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
     }
 
     @Override
-    public void onEdit(SensorConfig sensor) {
-        showSensorDialog(sensor);
-    }
+    public void onEdit(SensorConfig sensor) { showSensorDialog(sensor); }
 
     @Override
     public void onDelete(SensorConfig sensor) {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Sensor")
-                .setMessage("Are you sure you want to delete " + sensor.getName() + "?")
-                .setPositiveButton("Delete", (dialog, which) -> {
-                    sensorList.remove(sensor);
-                    saveSensors();
-                    updateKindChips();
-                    adapter.updateData(sensorList);
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        sensorList.remove(sensor);
+        saveSensors();
+        updateFilterChips();
+        applyFilters();
     }
 
     @Override
     public void onToggleHide(SensorConfig sensor) {
         sensor.setHidden(!sensor.isHidden());
         saveSensors();
-        adapter.updateData(sensorList);
+        adapter.notifyDataSetChanged();
     }
 
     @Override
     public void onClick(SensorConfig sensor) {
-        View infoView = LayoutInflater.from(this).inflate(android.R.layout.simple_list_item_1, null);
-        TextView textView = infoView.findViewById(android.R.id.text1);
-        textView.setPadding(48, 48, 48, 48);
-        
-        String details = "Name: " + sensor.getName() + "\n" +
-                        "Kind: " + sensor.getKind() + "\n" +
-                        "Value: " + sensor.getLastValue() + "\n" +
-                        "Time: " + sensor.getLastTime() + "\n\n" +
-                        "Space UUID: " + sensor.getSpaceUuid() + "\n" +
-                        "Sensor UUID: " + sensor.getSensorUuid();
-        
-        textView.setText(details);
-
-        new AlertDialog.Builder(this)
-                .setTitle("Sensor Details")
-                .setView(infoView)
-                .setPositiveButton("Close", null)
-                .show();
+        String details = "Name: " + sensor.getName() + "\nSpace: " + sensor.getSpaceName() + "\nKind: " + sensor.getKind() + 
+                        "\nValue: " + sensor.getLastValue() + "\nTime: " + sensor.getLastTime();
+        new AlertDialog.Builder(this).setTitle("Sensor Details").setMessage(details).setPositiveButton("Close", null).show();
     }
 
     private void updateWidgets() {
         Intent intent = new Intent(this, Logger.class);
         intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-        int[] ids = AppWidgetManager.getInstance(getApplication())
-                .getAppWidgetIds(new ComponentName(getApplication(), Logger.class));
+        int[] ids = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName(getApplication(), Logger.class));
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
         sendBroadcast(intent);
     }
@@ -348,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
             public void onFinished() {
                 if (progressBar != null) progressBar.setVisibility(View.GONE);
                 btnRefresh.setEnabled(true);
-                updateKindChips();
+                updateFilterChips();
                 applyFilters();
                 Toast.makeText(MainActivity.this, "Sensors updated", Toast.LENGTH_SHORT).show();
             }

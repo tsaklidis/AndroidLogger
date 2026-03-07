@@ -6,6 +6,7 @@ import java.util.UUID;
 public class SensorConfig implements Serializable {
     private String id;
     private String name;
+    private String spaceName;
     private String spaceUuid;
     private String sensorUuid;
     private String lastValue = "N/A";
@@ -23,6 +24,8 @@ public class SensorConfig implements Serializable {
     public String getId() { return id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    public String getSpaceName() { return spaceName; }
+    public void setSpaceName(String spaceName) { this.spaceName = spaceName; }
     public String getSpaceUuid() { return spaceUuid; }
     public void setSpaceUuid(String spaceUuid) { this.spaceUuid = spaceUuid; }
     public String getSensorUuid() { return sensorUuid; }

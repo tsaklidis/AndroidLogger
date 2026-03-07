@@ -35,10 +35,10 @@
         android:drawableStart="@drawable/ic_temperature"
         android:drawablePadding="8dp"
         android:gravity="center_vertical"
-        android:textSize="18sp"
+        android:textSize="22sp"
         android:textColor="@color/weather_on_surface"
         android:textStyle="bold"
-        android:paddingBottom="2dp" />
+        android:paddingBottom="4dp" />
 
     <!-- 12h Min / Max -->
     <LinearLayout
@@ -47,7 +47,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingStart="42dp"
-        android:paddingBottom="6dp">
+        android:paddingBottom="12dp">
 
         <ImageView
             android:layout_width="14dp"
@@ -60,36 +60,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/na"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:textColor="@color/weather_on_surface_medium"
             android:paddingStart="4dp" />
     </LinearLayout>
-
-    <!-- Humidity -->
-    <TextView
-        android:id="@+id/humidity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/na"
-        android:drawableStart="@drawable/ic_humidity"
-        android:drawablePadding="8dp"
-        android:gravity="center_vertical"
-        android:textSize="15sp"
-        android:textColor="@color/weather_on_surface"
-        android:paddingBottom="4dp" />
-
-    <!-- Pressure -->
-    <TextView
-        android:id="@+id/widget_pressure"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/na"
-        android:drawableStart="@drawable/ic_pressure_meter"
-        android:drawablePadding="8dp"
-        android:gravity="center_vertical"
-        android:textSize="14sp"
-        android:textColor="@color/weather_on_surface"
-        android:paddingBottom="8dp" />
 
     <!-- Divider -->
     <FrameLayout
