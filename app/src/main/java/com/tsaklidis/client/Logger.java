@@ -3,8 +3,10 @@ package com.tsaklidis.client;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -12,68 +14,64 @@ import android.widget.Toast;
 
 public class Logger extends AppWidgetProvider {
     private static Data data;
+    private static final long REFRESH_THRESHOLD = 30000; // 30 seconds debounce
+    public static final String ACTION_MANUAL_REFRESH = "com.tsaklidis.client.ACTION_MANUAL_REFRESH";
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
-        Toast.makeText(context, "Ανανέωση...", Toast.LENGTH_SHORT).show();
+    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId, boolean isManual) {
+        if (isManual) {
+            SharedPreferences prefs = context.getSharedPreferences("LoggerPrefs", Context.MODE_PRIVATE);
+            long lastUpdate = prefs.getLong("last_widget_refresh", 0);
+            long now = System.currentTimeMillis();
+
+            if (now - lastUpdate < REFRESH_THRESHOLD) {
+                Log.d("Logger", "Refresh skipped - too frequent");
+                return;
+            }
+            prefs.edit().putLong("last_widget_refresh", now).apply();
+            Toast.makeText(context, "Ανανέωση...", Toast.LENGTH_SHORT).show();
+        }
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.logger);
 
-        data = new Data(appWidgetManager, views, appWidgetId);
+        data = new Data(context, appWidgetManager, views, appWidgetId);
 
-        //Create an Intent with the AppWidgetManager.ACTION_APPWIDGET_UPDATE action//
+        // Create an Intent for manual refresh
         Intent intentUpdate = new Intent(context, Logger.class);
-        intentUpdate.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intentUpdate.setAction(ACTION_MANUAL_REFRESH);
 
-        //Update the current widget instance only, by creating an array that contains the widget’s unique ID//
-
-        int[] idArray = new int[]{appWidgetId};
-        intentUpdate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, idArray);
-
-        //Wrap the intent as a PendingIntent, using PendingIntent.getBroadcast()//
+        // Wrap the intent as a PendingIntent
         PendingIntent pendingUpdate = PendingIntent.getBroadcast(
-                context, appWidgetId, intentUpdate,
-                PendingIntent.FLAG_IMMUTABLE);
+                context, 0, intentUpdate,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        //Send the pending intent in response to the user tapping the ‘Update’ TextView//
-
+        // Attach the PendingIntent to the entire widget layout
+        views.setOnClickPendingIntent(R.id.widget_root, pendingUpdate);
         views.setOnClickPendingIntent(R.id.created_on, pendingUpdate);
-//        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://logs.tsaklidis.gr"));
-//        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-//        views.setOnClickPendingIntent(R.id.title, pendingIntent);
 
-//        String timeString = DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date());
-//        views.setTextViewText(R.id.updated_on, context.getResources().getString(R.string.time, "Ανανεώθηκε: " + timeString));
-
-        //Request that the AppWidgetManager updates the application widget//
         appWidgetManager.updateAppWidget(appWidgetId, views);
-
     }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
+            updateAppWidget(context, appWidgetManager, appWidgetId, false);
         }
-    }
-
-    @Override
-    public void onEnabled(Context context) {
-        // Enter relevant functionality for when the first widget is created
-    }
-
-    @Override
-    public void onDisabled(Context context) {
-        // Enter relevant functionality for when the last widget is disabled
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+        Log.d("Logger", "onReceive() called with action: " + intent.getAction());
+        
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(context, Logger.class));
 
-        // RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.logger);
-        // find your TextView here by id here and update it.
-        Log.d("Logger", "onReceive() called");
+        if (ACTION_MANUAL_REFRESH.equals(intent.getAction())) {
+            for (int appWidgetId : appWidgetIds) {
+                updateAppWidget(context, appWidgetManager, appWidgetId, true);
+            }
+        } else if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(intent.getAction())) {
+            onUpdate(context, appWidgetManager, appWidgetIds);
+        }
     }
-
 }
