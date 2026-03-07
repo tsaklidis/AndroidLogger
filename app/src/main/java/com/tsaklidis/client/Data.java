@@ -6,6 +6,7 @@ import android.widget.ArrayAdapter;
 import android.widget.RemoteViews;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,21 +41,78 @@ public class Data {
     }
 
     public Data(AppWidgetManager widgetManager, RemoteViews views, int appWidgetId) {
-        //Constructor overload
+        //Constructor overload - Widget
         this.temperature = getTemperature();
         this.humidity = getHumidity();
-        this.pressure = getPressure();
+        // Don't fetch pressure for the widget
         this.widgetManager = widgetManager;
         this.views = views;
         this.appWidgetId = appWidgetId;
+        // Fetch min/max temperature for last 12 hours
+        fetchMinMaxTemperature(1, Double.MAX_VALUE, -Double.MAX_VALUE);
     }
+
     public Data(ArrayAdapter adapter, ArrayList remoteArrayList) {
-        // Constructor overload
+        // Constructor overload - Main Activity
         this.temperature = getTemperature();
         this.humidity = getHumidity();
         this.pressure = getPressure();
         this.adapter = adapter;
         this.arrayList = remoteArrayList;
+    }
+
+    private void fetchMinMaxTemperature(final int page, final double currentMin, final double currentMax) {
+        methods.getTemperature12h(page).enqueue(new Callback<ModelList>() {
+            @Override
+            public void onResponse(Call<ModelList> call, Response<ModelList> response) {
+                if (response.body() == null || response.body().getResults() == null) {
+                    applyMinMax(currentMin, currentMax);
+                    return;
+                }
+
+                List<Model> results = response.body().getResults();
+                double min = currentMin;
+                double max = currentMax;
+
+                for (Model m : results) {
+                    double val = m.getValue();
+                    if (val < min) min = val;
+                    if (val > max) max = val;
+                }
+
+                // Check if there are more pages
+                if (response.body().getNext() != null && !response.body().getNext().isEmpty()) {
+                    fetchMinMaxTemperature(page + 1, min, max);
+                } else {
+                    applyMinMax(min, max);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ModelList> call, Throwable t) {
+                Log.e(TAG, "onFailure fetching 12h temp data: " + t.getMessage());
+                applyMinMax(currentMin, currentMax);
+            }
+        });
+    }
+
+    private void applyMinMax(double min, double max) {
+        if (min == Double.MAX_VALUE || max == -Double.MAX_VALUE) {
+            // No data available
+            if (views != null) {
+                views.setTextViewText(R.id.temp_min_max, "N/A");
+            }
+        } else {
+            String minMaxText = min + " \u2103  /  " + max + " \u2103";
+            if (views != null) {
+                views.setTextViewText(R.id.temp_min_max, minMaxText);
+            }
+            if (adapter != null) {
+                arrayList.add("12h Min/Max: " + minMaxText);
+            }
+        }
+        update_data();
+        Log.d(TAG, "Applied min/max temperature for last 12h");
     }
 
     public String getTemperature() {
@@ -118,15 +176,11 @@ public class Data {
             @Override
             public void onResponse(Call<Model> call, Response<Model> response) {
                 pressure = String.valueOf(response.body().getValue());
-                if (views != null){
-                    views.setTextViewText(R.id.pressure, pressure + " hPa");
-                }
                 if (adapter != null){
                     arrayList.add("Pressure: " + pressure + " hPa");
                 }
                 update_data();
                 Log.d(TAG, "called getPressure(): " + pressure);
-
 
             }
             @Override

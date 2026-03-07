@@ -1,10 +1,12 @@
 package com.tsaklidis.client;
 
 public class Model {
-    String value;
+    double value;
     String created_on;
 
-    public String getValue() { return value; }
+    public double getValue() { return value; }
+
+    public String getValueStr() { return String.valueOf(value); }
 
     public String getCreated_on() {
         return created_on;

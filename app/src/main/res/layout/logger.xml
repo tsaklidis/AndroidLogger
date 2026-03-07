@@ -1,56 +1,98 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/widget_margin"
+    android:padding="@dimen/widget_padding"
     android:orientation="vertical"
-    android:background="@drawable/round"
-    >
+    android:background="@drawable/round">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/title"
+        android:textSize="14sp"
+        android:textColor="#1E293B"
+        android:textStyle="bold"
+        android:paddingBottom="6dp" />
+
+    <!-- Divider -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#15000000"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Current Temperature -->
+    <TextView
+        android:id="@+id/temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/na"
+        android:drawableStart="@drawable/ic_temperature"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical"
+        android:textSize="18sp"
+        android:textColor="#1E293B"
+        android:textStyle="bold"
+        android:paddingBottom="2dp" />
+
+    <!-- 12h Min / Max -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="42dp"
+        android:paddingBottom="6dp">
+
+        <ImageView
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:src="@drawable/ic_min_max"
+            android:contentDescription="@string/temp_min_max_label" />
 
         <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/title"
-            style="@style/title"
-            />
-
-        <TextView
-            android:id="@+id/temperature"
+            android:id="@+id/temp_min_max"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/na"
-            android:drawableLeft="@drawable/ic_temperature"
-            android:gravity="center_vertical"
-            style="@style/item"/>
+            android:textSize="12sp"
+            android:textColor="#64748B"
+            android:paddingStart="4dp" />
+    </LinearLayout>
 
+    <!-- Humidity -->
+    <TextView
+        android:id="@+id/humidity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/na"
+        android:drawableStart="@drawable/ic_humidity"
+        android:drawablePadding="8dp"
+        android:gravity="center_vertical"
+        android:textSize="15sp"
+        android:textColor="#334155"
+        android:paddingBottom="8dp" />
 
-        <TextView
-            android:id="@+id/humidity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/na"
-            android:drawableLeft="@drawable/ic_humidity"
-            android:gravity="center_vertical"
-            style="@style/item"/>
+    <!-- Divider -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#10000000"
+        android:layout_marginBottom="4dp" />
 
-        <TextView
-            android:id="@+id/pressure"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/item"
-            android:drawableLeft="@drawable/ic_pressure_meter"
-            android:gravity="center_vertical"
-            android:text="@string/na" />
-
-        <TextView
-            android:id="@+id/created_on"
-            style="@style/item"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:gravity="center_vertical"
-            android:drawableRight="@drawable/ic_baseline_refresh_24"
-            android:text="@string/na"
-            android:textSize="13sp" />
+    <!-- Last update + refresh -->
+    <TextView
+        android:id="@+id/created_on"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:gravity="center_vertical"
+        android:drawableEnd="@drawable/ic_baseline_refresh_24"
+        android:drawablePadding="4dp"
+        android:text="@string/na"
+        android:textSize="11sp"
+        android:textColor="#94A3B8" />
 
 </LinearLayout>

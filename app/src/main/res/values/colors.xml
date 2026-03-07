@@ -13,4 +13,13 @@
     <color name="light_blue_600">#FF039BE5</color>
     <color name="light_blue_900">#FF01579B</color>
     <color name="gray">#D6D6D6</color>
+
+    <!-- Weather theme colors -->
+    <color name="weather_primary">#FF1976D2</color>
+    <color name="weather_primary_dark">#FF1565C0</color>
+    <color name="weather_primary_light">#FF42A5F5</color>
+    <color name="weather_accent">#FF26C6DA</color>
+    <color name="weather_surface">#FFF5F9FF</color>
+    <color name="weather_on_surface">#FF1E293B</color>
+    <color name="weather_on_surface_medium">#FF64748B</color>
 </resources>

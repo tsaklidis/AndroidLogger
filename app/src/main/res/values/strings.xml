@@ -9,7 +9,8 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <string name="appwidget_text">Temperature | Humidity | Pressure</string>
+    <string name="appwidget_text">Temperature | Humidity</string>
+    <string name="temp_min_max_label">12h Min / Max</string>
     <string name="add_widget">Add widget</string>
     <string name="app_widget_description">Μετρήσεις μετεωρολογικού σταθμού (Τσακλίδης)</string>
     <string name="time">%1$s</string>
