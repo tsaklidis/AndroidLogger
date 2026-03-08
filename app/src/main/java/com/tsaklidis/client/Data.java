@@ -64,7 +64,7 @@ public class Data {
         }
     }
 
-    // Constructor for Widget
+    // Constructor for Widget - STRICTLY followed requirements
     public Data(Context context, AppWidgetManager widgetManager, RemoteViews views, int appWidgetId) {
         this.context = context.getApplicationContext();
         this.widgetManager = widgetManager;
@@ -73,10 +73,10 @@ public class Data {
         this.adapter = null;
         this.methods = RetrofitClient.getMethods(context);
         
-        // 2 calls: Bulk Open Data + MinMax History
+        // 2 requirements: Last reading and 12h Min/Max
         activeCalls.set(2);
         
-        fetchOpenDataBulk();
+        fetchOpenTemperatureOnlyForWidget();
         fetchMinMaxTemperature(1, Double.MAX_VALUE, -Double.MAX_VALUE);
     }
 
@@ -93,7 +93,6 @@ public class Data {
         SharedPreferences prefs = context.getSharedPreferences("LoggerPrefs", Context.MODE_PRIVATE);
         String token = prefs.getString("auth_token", "").trim();
 
-        // 3 categories of calls: Bulk Open, MinMax, and Bulk Custom (if token present)
         int totalCalls = 2;
         if (!token.isEmpty() && sensorList != null && !sensorList.isEmpty()) {
             totalCalls++;
@@ -103,6 +102,33 @@ public class Data {
 
         fetchOpenDataBulk();
         fetchMinMaxTemperature(1, Double.MAX_VALUE, -Double.MAX_VALUE);
+    }
+
+    private void fetchOpenTemperatureOnlyForWidget() {
+        methods.getLastTemprData().enqueue(new Callback<Model>() {
+            @Override
+            public void onResponse(Call<Model> call, Response<Model> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Model m = response.body();
+                    temperature = String.valueOf(m.getValue());
+                    created_on = m.getCreated_on();
+                    if (created_on != null && created_on.length() >= 16) {
+                        created_on = "Μέτρηση: " + created_on.substring(0, 10) + " " + created_on.substring(11, 16);
+                    }
+                    if (views != null) {
+                        views.setTextViewText(R.id.temperature, temperature + " \u2103");
+                        views.setTextViewText(R.id.created_on, created_on);
+                        widgetManager.updateAppWidget(appWidgetId, views);
+                    }
+                }
+                callFinished();
+            }
+
+            @Override
+            public void onFailure(Call<Model> call, Throwable t) {
+                callFinished();
+            }
+        });
     }
 
     private void fetchOpenDataBulk() {
@@ -120,17 +146,8 @@ public class Data {
                             if (created_on != null && created_on.length() >= 16) {
                                 created_on = "Μέτρηση: " + created_on.substring(0, 10) + " " + created_on.substring(11, 16);
                             }
-                            if (views != null) {
-                                views.setTextViewText(R.id.temperature, temperature + " \u2103");
-                                views.setTextViewText(R.id.created_on, created_on);
-                            }
-                        } else if (UUID_HUM.equals(uuid)) {
-                            humidity = String.valueOf(m.getValue());
-                        } else if (UUID_PRESS.equals(uuid)) {
-                            pressure = String.valueOf(m.getValue());
                         }
                     }
-                    if (views != null && widgetManager != null) widgetManager.updateAppWidget(appWidgetId, views);
                 }
                 callFinished();
             }
@@ -201,7 +218,7 @@ public class Data {
     }
 
     private void fetchMinMaxTemperature(final int page, final double currentMin, final double currentMax) {
-        methods.getTemperature12h(page).enqueue(new Callback<ModelList>() {
+        methods.getTemperature12h(UUID_TEMP, 12, page).enqueue(new Callback<ModelList>() {
             @Override
             public void onResponse(Call<ModelList> call, Response<ModelList> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getResults() != null) {
@@ -238,14 +255,8 @@ public class Data {
             String text = String.format(Locale.getDefault(), "%.1f", min) + " \u2103  /  " + String.format(Locale.getDefault(), "%.1f", max) + " \u2103";
             if (views != null) {
                 views.setTextViewText(R.id.temp_min_max, text);
-                if (widgetManager != null) widgetManager.updateAppWidget(appWidgetId, views);
+                widgetManager.updateAppWidget(appWidgetId, views);
             }
         }
-    }
-
-    private List<SensorConfig> loadSensorsFromPrefs(SharedPreferences prefs) {
-        String json = prefs.getString("sensors_json", "");
-        if (json.isEmpty()) return new ArrayList<>();
-        return new Gson().fromJson(json, new TypeToken<List<SensorConfig>>() {}.getType());
     }
 }

@@ -35,7 +35,7 @@
         android:drawableStart="@drawable/ic_temperature"
         android:drawablePadding="8dp"
         android:gravity="center_vertical"
-        android:textSize="22sp"
+        android:textSize="24sp"
         android:textColor="@color/weather_on_surface"
         android:textStyle="bold"
         android:paddingBottom="4dp" />

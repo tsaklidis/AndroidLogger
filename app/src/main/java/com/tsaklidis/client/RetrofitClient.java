@@ -2,6 +2,7 @@ package com.tsaklidis.client;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import okhttp3.ConnectionPool;
@@ -34,6 +35,9 @@ public class RetrofitClient {
                             
                             Request original = chain.request();
                             Request.Builder builder = original.newBuilder();
+                            
+                            // Log the request URL
+                            Log.d("RetrofitClient", "Request URL: " + original.url());
                             
                             // Use same session-like headers
                             builder.header("Connection", "keep-alive");
