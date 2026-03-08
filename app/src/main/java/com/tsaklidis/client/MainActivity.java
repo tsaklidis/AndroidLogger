@@ -21,7 +21,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -125,7 +124,6 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
 
     private void deleteAllSensors() {
         if (sensorList.isEmpty()) {
-            Toast.makeText(this, "No sensors to delete", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -139,7 +137,6 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
                     selectedSpaces.clear();
                     updateFilterChips();
                     adapter.updateData(sensorList);
-                    Toast.makeText(this, "All sensors deleted", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -208,12 +205,10 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
     private void syncAccountSensors() {
         String token = tokenInput.getText().toString().trim();
         if (token.isEmpty()) {
-            Toast.makeText(this, "Please enter a token first", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(true);
-        Toast.makeText(this, "Syncing sensors...", Toast.LENGTH_SHORT).show();
         
         Methods methods = RetrofitClient.getMethods(this);
         methods.getMyHouses().enqueue(new Callback<List<HouseModel>>() {
@@ -247,14 +242,12 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
                         updateFilterChips();
                         adapter.updateData(sensorList);
                         refreshData();
-                        Toast.makeText(MainActivity.this, "Synced " + newSensors.size() + " sensors", Toast.LENGTH_SHORT).show();
                     }
                 }
             }
             @Override
             public void onFailure(Call<List<HouseModel>> call, Throwable t) {
                 if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
-                Toast.makeText(MainActivity.this, "Sync failed: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -350,7 +343,6 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
     private void refreshData() {
         if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(true);
         btnRefresh.setEnabled(false);
-        Toast.makeText(this, "Updating sensors...", Toast.LENGTH_SHORT).show();
         
         new Data(this, adapter, sensorList, new Data.DataUpdateListener() {
             @Override
@@ -359,13 +351,11 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
                 btnRefresh.setEnabled(true);
                 updateFilterChips();
                 applyFilters();
-                Toast.makeText(MainActivity.this, "Sensors updated", Toast.LENGTH_SHORT).show();
             }
             @Override
             public void onError(String message) {
                 if (swipeRefreshLayout != null) swipeRefreshLayout.setRefreshing(false);
                 btnRefresh.setEnabled(true);
-                Toast.makeText(MainActivity.this, "Error: " + message, Toast.LENGTH_SHORT).show();
             }
         });
     }

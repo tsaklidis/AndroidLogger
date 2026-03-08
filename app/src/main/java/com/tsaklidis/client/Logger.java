@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
 
 public class Logger extends AppWidgetProvider {
@@ -50,7 +49,6 @@ public class Logger extends AppWidgetProvider {
         super.onReceive(context, intent);
         Log.d("Logger", "onReceive: " + intent.getAction());
         if (ACTION_WIDGET_REFRESH.equals(intent.getAction())) {
-            Toast.makeText(context, "Ανανέωση...", Toast.LENGTH_SHORT).show();
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             ComponentName thisWidget = new ComponentName(context, Logger.class);
             int[] appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
