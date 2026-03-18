@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
         recyclerView.setAdapter(adapter);
 
         updateFilterChips();
-        refreshData();
+        refreshData(); // Auto-refresh on startup
 
         btnRefresh.setOnClickListener(v -> refreshData());
     }
@@ -241,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
                         selectedSpaces.clear();
                         updateFilterChips();
                         adapter.updateData(sensorList);
-                        refreshData();
+                        // refreshData(); // Removed auto-refresh after sync
                     }
                 }
             }
@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
                     saveSensors();
                     updateFilterChips();
                     applyFilters();
-                    refreshData();
+                    // refreshData(); // Removed auto-refresh after save
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -351,6 +351,7 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
                 btnRefresh.setEnabled(true);
                 updateFilterChips();
                 applyFilters();
+                updateWidget(); // Trigger widget update when manual refresh is done
             }
             @Override
             public void onError(String message) {
@@ -358,5 +359,14 @@ public class MainActivity extends AppCompatActivity implements SensorAdapter.OnS
                 btnRefresh.setEnabled(true);
             }
         });
+    }
+
+    private void updateWidget() {
+        Intent intent = new Intent(this, Logger.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        int[] ids = AppWidgetManager.getInstance(getApplication())
+                .getAppWidgetIds(new ComponentName(getApplication(), Logger.class));
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        sendBroadcast(intent);
     }
 }
